@@ -25,6 +25,7 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.vscode/
 MANIFEST
 
 # PyInstaller
@@ -60,6 +61,9 @@ coverage.xml
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+*/static/**
+*/media/**
+!*/media/user_profile/photos/default.png   
 
 # Flask stuff:
 instance/
@@ -127,3 +131,15 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# project specific
+user_data/
+dbdata/
+
+# data
+*.csv
+*.db
+*.xls
+
+# Databases
+/data/**			  
