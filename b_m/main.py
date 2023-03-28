@@ -1,5 +1,4 @@
 import models
-from auth import get_current_user, get_user_exception
 from database import SessionLocal, engine
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -32,7 +31,7 @@ class Users(BaseModel):
     username: str
     first_name: str
     last_name: str
-    # hashed_password: str | None = None
+    hashed_password: str | None = None
     company_id: int
 
 
@@ -47,6 +46,18 @@ class Contract(BaseModel):
 @app.get("/")
 async def read_all(db: Session = Depends(get_db)):
     return db.query(models.Company).all()
+
+
+@app.get("/companies/users")
+async def read_all_by_user(company_id: int, db: Session = Depends(get_db)):
+    return db.query(models.Users).filter(
+        models.Users.company_id == company_id).all()
+
+
+@app.get("/companies/contracts")
+async def read_all_by_contr(company_id: int, db: Session = Depends(get_db)):
+    return db.query(models.Contract).filter(
+        models.Contract.company_id == company_id).all()
 
 
 @app.get("/users/{users_id}")
@@ -82,7 +93,7 @@ async def read_contract(contract_id: int, db: Session = Depends(get_db)):
         models.Contract.id == contract_id).first()
     if contract_model is not None:
         return contract_model
-    raise http_exception()
+    raise http_exception_contract()
 
 
 @app.post("/companies")
@@ -174,7 +185,7 @@ async def update_contract(contract_id: int, contract: Contract, db: Session = De
         models.Contract.id == contract_id).first()
 
     if contract_model is None:
-        raise http_exception()
+        raise http_exception_contract()
 
     contract_model.contr_num = contract.contr_num
     contract_model.contr_type = contract.contr_type
@@ -218,7 +229,7 @@ async def delete_contract(contract_id: int, db: Session = Depends(get_db)):
     contract_model = db.query(models.Contract).filter(
         models.Contract.id == contract_id).first()
     if contract_model is None:
-        raise http_exception()
+        raise http_exception_contract()
 
     db.query(models.Contract).filter(
         models.Contract.id == contract_id).delete()
@@ -232,6 +243,10 @@ def successful_response(status_code: int):
         'status': status_code,
         'transaction': 'Successful'
     }
+
+
+def http_exception_contract():
+    return HTTPException(status_code=404, detail="contract not found")
 
 
 def http_exception():
